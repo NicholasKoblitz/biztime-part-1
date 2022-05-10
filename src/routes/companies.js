@@ -16,9 +16,9 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:code", async (req, res, next) => {
     try {
-        const code = req.query.code;
+        const code = req.params.code;
         const results = await db.query(`SELECT * FROM companies WHERE code = $1`, [code])
-        return res.json({comapny: results.rows[0]})
+        return res.json({company: results.rows[0]})
     }
     catch(e) {
         next(e)
@@ -42,7 +42,16 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:code", async (req, res, next) => {
     try {
-        if(req.params.code) {
+        const code = req.params.code;
+        const codes = await db.query(`SELECT code FROM companies`);
+        let validCode;
+        for(let c of codes.rows) {
+            if(req.params.code === c.code){
+                validCode = c.code
+            }
+        }
+
+        if(validCode) {
             const { name, description } = req.body;
             const results = await db.query(`
             UPDATE companies SET name=$1, description=$2
@@ -63,10 +72,19 @@ router.put("/:code", async (req, res, next) => {
 
 router.delete("/:code", async (req, res, next) => {
     try {
-        if(req.params.code) {
-            const { name, description } = req.body;
+
+        const code = req.params.code;
+        const codes = await db.query(`SELECT code FROM companies`);
+        let validCode;
+        for(let c of codes.rows) {
+            if(req.params.code === c.code){
+                validCode = c.code
+            }
+        }
+
+        if(validCode) {
             const results = await db.query(`
-            DELETE FROM comapnies
+            DELETE FROM companies
             WHERE code = $1`,
             [req.params.code]
             );
