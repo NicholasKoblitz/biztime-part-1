@@ -51,7 +51,7 @@ router.post("/", async (req, res, next) => {
             RETURNING id, comp_code, amt, paid, add_date, paid_date`, 
             [comp_code, amt]);
 
-            return res.json({invoice: results.rows[0]})
+            return res.status(201).json({invoice: results.rows[0]})
     }
     catch(e) {
         next(e);

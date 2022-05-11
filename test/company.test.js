@@ -5,15 +5,24 @@ const app = require("../src/app");
 const db = require("../src/db");
 
 let testComp;
+let testInvo;
 
 beforeEach(async () => {
     // Adds company to test database
-    let query = await db.query(
+    let company = await db.query(
         `INSERT INTO companies (code, name, description) 
         VALUES ('apple', 'Apple Computer', 'appletest') 
         RETURNING code, name, description`
     );
-    testComp = query.rows[0];
+    let invoive = await db.query(
+        `INSERT INTO invoices (comp_Code, amt, paid, paid_date)
+        VALUES ('apple', 100, false, null)
+        RETURNING id, comp_code, amt, paid, add_date, paid_date`
+    );
+
+    testComp = company.rows[0];
+    testInvo = invoive.rows[0];
+    testInvo.add_date = testInvo.add_date.toISOString();
 });
 
 
@@ -33,7 +42,7 @@ describe("GET /companies/:code", () => {
     test('should return a single company', async () => {
         const response = await request(app).get(`/companies/${testComp.code}`)
         expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual({company: testComp});
+        expect(response.body).toEqual({company: testComp, invoices: [testInvo]});
     })
 })
 
