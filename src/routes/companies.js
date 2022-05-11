@@ -18,7 +18,8 @@ router.get("/:code", async (req, res, next) => {
     try {
         const code = req.params.code;
         const results = await db.query(`SELECT * FROM companies WHERE code = $1`, [code])
-        return res.json({company: results.rows[0]})
+        const invoice = await db.query(`SELECT * FROM invoices WHERE comp_code=$1`, [code])
+        return res.json({company: results.rows[0], invoices: invoice.rows})
     }
     catch(e) {
         next(e)
