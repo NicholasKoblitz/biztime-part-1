@@ -17,10 +17,21 @@ router.get("/", async (req, res, next) => {
 
 router.get("/:code", async (req, res, next) => {
     try {
-        const code = req.params.code;
-        const results = await db.query(`SELECT * FROM companies WHERE code = $1`, [code])
-        const invoice = await db.query(`SELECT * FROM invoices WHERE comp_code=$1`, [code])
-        return res.json({company: results.rows[0], invoices: invoice.rows})
+        const result = await db.query(
+            `SELECT c.code, c.name, c.description, i.industry
+            FROM companies AS c
+            LEFT JOIN industries_companies AS ic
+            ON c.code = ic.comp_code
+            LEFT JOIN industries AS i
+            ON ic.indus_code = i.code
+            WHERE c.code=$1`,
+            [req.params.code]
+        );
+        
+        let { code, name, description} = result.rows[0]
+        let industries = result.rows.map(i => i.industry)
+
+        return res.json({company: {code, name, description, industries}})
     }
     catch(e) {
         next(e)

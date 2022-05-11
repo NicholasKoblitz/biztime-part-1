@@ -21,6 +21,17 @@ beforeEach(async () => {
         RETURNING id, comp_code, amt, paid, add_date, paid_date`
     );
 
+    let i = await db.query(
+        `INSERT INTO industries (code, industry)
+        VALUES ('tech', 'Technology'),
+                ('res', 'Research')`
+    );
+
+    let ic = await db.query(
+        `INSERT INTO industries_companies (comp_code, indus_code)
+        VALUES ('apple', 'tech')`
+    );
+
     testComp = company.rows[0];
     testInvo = invoive.rows[0];
     testInvo.add_date = testInvo.add_date.toISOString();
@@ -42,8 +53,9 @@ describe("GET /companies", () => {
 describe("GET /companies/:code", () => {
     test('should return a single company', async () => {
         const response = await request(app).get(`/companies/${testComp.code}`)
+        let { code, name, description} = testComp
         expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual({company: testComp, invoices: [testInvo]});
+        expect(response.body).toEqual({company: {code, name, description, industries: ["Technology"]}});
     })
 })
 
@@ -112,6 +124,8 @@ describe('DELETE /companies/:code', () => {
 afterEach(async () => {
     // Deletes company from database
     await db.query(`DELETE FROM companies`);
+    await db.query(`DELETE FROM industries`);
+    await db.query(`DELETE FROM industries_companies`);
 });
 
 afterAll(async () => {
