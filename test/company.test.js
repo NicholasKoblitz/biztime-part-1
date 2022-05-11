@@ -3,6 +3,7 @@ process.env.NODE_ENV = "test";
 const request = require("supertest");
 const app = require("../src/app");
 const db = require("../src/db");
+const slugify = require("slugify");
 
 let testComp;
 let testInvo;
@@ -51,14 +52,13 @@ describe('POST /companies', () => {
         const response = await request(app)
         .post('/companies')
         .send({
-            "code": "newComp", 
             "name": "Comp", 
             "description": "TESTING"
         });
         expect(response.statusCode).toBe(201);
         expect(response.body).toEqual({
             company: {
-                "code": "newComp", 
+                "code": slugify("Comp"), 
                 "name": "Comp", 
                 "description": "TESTING" 
             }

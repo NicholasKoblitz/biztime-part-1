@@ -79,18 +79,52 @@ describe("POST /invoices", () => {
 
 
 describe("PUT /invoice/:id", () => {
-    test("should return updated invoice", async () => {
+    test("should return updated paid invoice", async () => {
         const response = await request(app)
         .put(`/invoices/${testInvo.id}`)
         .send({
-            amt: 500
+            amt: 500,
+            paid: true
         })
+
+        let testDate = new Date();
+        testDate.setHours(0);
+        testDate.setMinutes(0);
+        testDate.setSeconds(0);
+        testDate.setMilliseconds(0)
+
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual({
             invoice: {
                 id: expect.any(Number),
                 comp_code: "apple",
                 amt: 500,
+                paid: true,
+                add_date: testInvo.add_date,
+                paid_date: testDate.toISOString()
+            }
+        })
+    })
+    test("should return a updated unpaid invoice", async () => {
+        const response = await request(app)
+        .put(`/invoices/${testInvo.id}`)
+        .send({
+            amt: 600,
+            paid: false
+        })
+
+        let testDate = new Date();
+        testDate.setHours(0);
+        testDate.setMinutes(0);
+        testDate.setSeconds(0);
+        testDate.setMilliseconds(0)
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual({
+            invoice: {
+                id: expect.any(Number),
+                comp_code: "apple",
+                amt: 600,
                 paid: false,
                 add_date: testInvo.add_date,
                 paid_date: null
