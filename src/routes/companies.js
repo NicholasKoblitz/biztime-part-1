@@ -10,7 +10,7 @@ router.get("/", async (req, res, next) => {
         return res.json({companies: results.rows});
     }
     catch(e) {
-        next(e);
+        return next(e);
 
     }
 })
